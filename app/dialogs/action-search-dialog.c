@@ -567,11 +567,16 @@ action_search_history_and_actions (const gchar  *keyword,
 
           name = gtk_action_get_name (action);
 
-          if (g_str_has_suffix (name, "-menu")           ||
-              g_str_has_suffix (name, "-popup")          ||
-              g_str_has_prefix (name, "context-")        ||
-              g_str_has_prefix (name, "plug-in-recent-") ||
-              g_strcmp0 (name, "dialogs-action-search") == 0)
+          /* The action search dialog don't show any non-historized
+           * action, with the exception of "plug-in-repeat/reshow"
+           * actions.
+           * Logging them is meaningless (they may mean a different
+           * actual action each time), but they are still interesting
+           * as a search result.
+           */
+          if (gimp_action_history_excluded_action (name) &&
+              g_strcmp0 (name, "plug-in-repeat") != 0    &&
+              g_strcmp0 (name, "plug-in-reshow") != 0)
             continue;
 
           if (! gtk_action_get_sensitive (action) && ! private->config->search_show_unavailable)

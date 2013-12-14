@@ -37,4 +37,6 @@ GList *    gimp_action_history_search            (const gchar         *keyword,
                                                   GimpActionMatchFunc  match_func,
                                                   GimpGuiConfig       *config);
 
+gboolean   gimp_action_history_excluded_action   (const gchar         *action_name);
+
 #endif  /* __GIMP_ACTION_HISTORY_H__ */

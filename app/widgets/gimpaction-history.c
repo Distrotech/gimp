@@ -119,6 +119,24 @@ gimp_action_history_exit (GimpGuiConfig *config)
   g_free (history_file_path);
 }
 
+/* gimp_action_history_excluded_action:
+ *
+ * Returns whether an action should be excluded from history.
+ */
+gboolean
+gimp_action_history_excluded_action (const gchar *action_name)
+{
+  return (g_str_has_suffix (action_name, "-menu")           ||
+          g_str_has_suffix (action_name, "-popup")          ||
+          g_str_has_suffix (action_name, "-set")            ||
+          g_str_has_suffix (action_name, "-accel")          ||
+          g_str_has_prefix (action_name, "context-")        ||
+          g_str_has_prefix (action_name, "plug-in-recent-") ||
+          g_strcmp0 (action_name, "plug-in-repeat") == 0    ||
+          g_strcmp0 (action_name, "plug-in-reshow") == 0    ||
+          g_strcmp0 (action_name, "dialogs-action-search") == 0);
+}
+
 /* Callback run on the `activate` signal of an action.
    It allows us to log all used action. */
 void
@@ -132,13 +150,7 @@ gimp_action_history_activate_callback (GtkAction *action,
   action_name = gtk_action_get_name (action);
 
   /* Some specific actions are of no log interest. */
-  if (g_str_has_suffix (action_name, "-menu")           ||
-      g_str_has_suffix (action_name, "-popup")          ||
-      g_str_has_prefix (action_name, "context-")        ||
-      g_str_has_prefix (action_name, "plug-in-recent-") ||
-      g_strcmp0 (action_name, "plug-in-repeat") == 0    ||
-      g_strcmp0 (action_name, "plug-in-reshow") == 0    ||
-      g_strcmp0 (action_name, "dialogs-action-search") == 0)
+  if (gimp_action_history_excluded_action (action_name))
     return;
 
   for (actions = history; actions; actions = g_list_next (actions))
@@ -244,9 +256,7 @@ gimp_action_insert (const gchar *action_name,
   GimpUIManager     *manager;
 
   /* We do not insert some categories of actions. */
-  if (g_str_has_suffix (action_name, "-menu")  ||
-      g_str_has_suffix (action_name, "-popup") ||
-      g_str_has_prefix (action_name, "context-"))
+  if (gimp_action_history_excluded_action (action_name))
     return;
 
   manager = gimp_ui_managers_from_name ("<Image>")->data;
