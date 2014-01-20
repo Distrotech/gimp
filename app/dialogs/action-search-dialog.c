@@ -50,9 +50,6 @@ typedef struct
   GtkWidget     *keyword_entry;
   GtkWidget     *results_list;
   GtkWidget     *list_view;
-
-  GtkWidget     *opacity_scale;
-  GtkAdjustment *opacity_adjustment;
 } SearchDialog;
 
 static void         key_released                           (GtkWidget         *widget,
@@ -89,14 +86,6 @@ static void         action_search_finalizer                (SearchDialog      *p
 static gboolean     window_configured                      (GtkWindow         *window,
                                                             GdkEvent          *event,
                                                             SearchDialog      *private);
-static gboolean     opacity_button_scrolled                (GtkWidget         *widget,
-                                                            GdkEvent          *event,
-                                                            SearchDialog      *private);
-static gboolean     opacity_button_clicked                 (GtkWidget         *widget,
-                                                            GdkEvent          *event,
-                                                            SearchDialog      *private);
-static void         opacity_scale_changed                  (GtkAdjustment     *adjustment,
-                                                            SearchDialog      *private);
 static void         action_search_setup_results_list       (GtkWidget        **results_list,
                                                             GtkWidget        **list_view);
 static void         search_dialog_free                     (SearchDialog      *private);
@@ -119,7 +108,6 @@ action_search_dialog_create (Gimp *gimp)
   SearchDialog  *private;
   GimpGuiConfig *config;
   GtkWidget     *main_vbox, *main_hbox;
-  GtkWidget     *opacity_button;
 
   gtk_accel_map_change_entry ("<Actions>/dialogs/dialogs-action-search", 'd', 0, FALSE);
 
@@ -137,7 +125,6 @@ action_search_dialog_create (Gimp *gimp)
 
   gtk_window_set_title (GTK_WINDOW (action_search_dialog), _("Search Actions"));
   action_search_update_position (private);
-  gtk_window_set_opacity (GTK_WINDOW (action_search_dialog), (gdouble) config->search_dialog_opacity / 100.0);
 
   main_vbox = gtk_vbox_new (FALSE, 2);
   gtk_container_add (GTK_CONTAINER (action_search_dialog), main_vbox);
@@ -152,22 +139,6 @@ action_search_dialog_create (Gimp *gimp)
   gtk_widget_show (private->keyword_entry);
   gtk_box_pack_start (GTK_BOX (main_hbox), private->keyword_entry, TRUE, TRUE, 0);
 
-  opacity_button = gtk_button_new ();
-  gtk_button_set_image (GTK_BUTTON (opacity_button),
-                        gtk_image_new_from_stock (GIMP_STOCK_TRANSPARENCY,
-                                                  GTK_ICON_SIZE_MENU));
-  gtk_widget_set_can_focus (opacity_button, FALSE);
-  gtk_widget_set_events (opacity_button, GDK_BUTTON_PRESS_MASK);
-  gtk_widget_set_tooltip_text (opacity_button, _("Set this dialog opacity."));
-  gtk_box_pack_end (GTK_BOX (main_hbox), opacity_button, FALSE, TRUE, 0);
-  gtk_widget_show (opacity_button);
-
-  private->opacity_adjustment = GTK_ADJUSTMENT (gtk_adjustment_new (100.0, 40.0, 100.0,
-                                                                    1.0, 10.0, 0.0));
-  private->opacity_scale = gimp_spin_scale_new (private->opacity_adjustment, _("Dialog Opacity"), 1);
-  gtk_box_pack_end (GTK_BOX (main_hbox), private->opacity_scale, TRUE, TRUE, 0);
-  gtk_widget_set_can_focus (private->opacity_scale, FALSE);
-
   action_search_setup_results_list (&private->results_list, &private->list_view);
   gtk_box_pack_start (GTK_BOX (main_vbox), private->list_view, TRUE, TRUE, 0);
 
@@ -179,9 +150,6 @@ action_search_dialog_create (Gimp *gimp)
   g_signal_connect (private->keyword_entry, "key-release-event", G_CALLBACK (key_released), private);
   g_signal_connect (private->results_list, "key_press_event", G_CALLBACK (result_selected), private);
   g_signal_connect (action_search_dialog, "event", G_CALLBACK (window_configured), private);
-  g_signal_connect (opacity_button, "scroll-event", G_CALLBACK (opacity_button_scrolled), private);
-  g_signal_connect (opacity_button, "clicked", G_CALLBACK (opacity_button_clicked), private);
-  g_signal_connect (private->opacity_adjustment, "value-changed", G_CALLBACK (opacity_scale_changed), private);
 
   gtk_widget_show (action_search_dialog);
 
@@ -866,71 +834,6 @@ window_configured (GtkWindow    *window,
         }
     }
   return FALSE;
-}
-
-static gboolean
-opacity_button_scrolled (GtkWidget    *widget,
-                         GdkEvent     *event,
-                         SearchDialog *private)
-{
-  GdkEventScroll *scroll      = (GdkEventScroll*) event;
-  GimpGuiConfig  *config      = private->config;
-  gint            new_opacity = config->search_dialog_opacity;
-
-  switch (scroll->direction)
-    {
-    case GDK_SCROLL_UP:
-      new_opacity = MIN (config->search_dialog_opacity + 2, 100);
-      break;
-
-    case GDK_SCROLL_DOWN:
-      new_opacity = MAX (config->search_dialog_opacity - 2, 40);
-      break;
-
-    default:
-      break;
-    }
-
-  if (new_opacity != config->search_dialog_opacity)
-    {
-      gtk_adjustment_set_value (private->opacity_adjustment,
-                                (gdouble) new_opacity);
-      return TRUE;
-    }
-
-  return FALSE;
-}
-
-static gboolean
-opacity_button_clicked (GtkWidget    *widget,
-                        GdkEvent     *event,
-                        SearchDialog *private)
-{
-  if (gtk_widget_get_visible (private->opacity_scale))
-    {
-      gtk_widget_hide (private->opacity_scale);
-    }
-  else
-    {
-      gtk_widget_show (private->opacity_scale);
-    }
-
-  return TRUE;
-}
-
-static void
-opacity_scale_changed (GtkAdjustment *adjustment,
-                       SearchDialog  *private)
-{
-  GimpGuiConfig *config  = private->config;
-  gdouble        opacity = gtk_adjustment_get_value (adjustment);
-
-  if (opacity != config->search_dialog_opacity)
-    {
-      config->search_dialog_opacity = opacity;
-      gtk_window_set_opacity (GTK_WINDOW (private->dialog),
-                              (gdouble) opacity / 100.0);
-    }
 }
 
 static void

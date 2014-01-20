@@ -67,7 +67,6 @@ struct _GimpGuiConfig
   gint                 search_dialog_y;
   gint                 search_dialog_width;
   gint                 search_dialog_height;
-  gint                 search_dialog_opacity;
   gboolean             search_show_unavailable;
   gint                 action_history_size;
 

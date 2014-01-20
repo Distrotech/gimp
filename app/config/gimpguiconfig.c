@@ -71,7 +71,6 @@ enum
   PROP_SEARCH_DIALOG_Y,
   PROP_SEARCH_DIALOG_WIDTH,
   PROP_SEARCH_DIALOG_HEIGHT,
-  PROP_SEARCH_DIALOG_OPACITY,
   PROP_SEARCH_SHOW_UNAVAILABLE_ACTIONS,
   PROP_ACTION_HISTORY_SIZE,
   PROP_USER_MANUAL_ONLINE,
@@ -260,13 +259,6 @@ gimp_gui_config_class_init (GimpGuiConfigClass *klass)
                                    g_param_spec_int ("search-dialog-height",
                                                      NULL, NULL,
                                                      20, 800, 200,
-                                                     G_PARAM_READWRITE |
-                                                     G_PARAM_CONSTRUCT |
-                                                     GIMP_PARAM_STATIC_STRINGS));
-  g_object_class_install_property (object_class, PROP_SEARCH_DIALOG_OPACITY,
-                                   g_param_spec_int ("search-dialog-opacity",
-                                                     NULL, NULL,
-                                                     10, 100, 100,
                                                      G_PARAM_READWRITE |
                                                      G_PARAM_CONSTRUCT |
                                                      GIMP_PARAM_STATIC_STRINGS));
@@ -495,9 +487,6 @@ gimp_gui_config_set_property (GObject      *object,
     case PROP_SEARCH_DIALOG_HEIGHT:
       gui_config->search_dialog_height = g_value_get_int (value);
       break;
-    case PROP_SEARCH_DIALOG_OPACITY:
-      gui_config->search_dialog_opacity = g_value_get_int (value);
-      break;
     case PROP_SEARCH_SHOW_UNAVAILABLE_ACTIONS:
       gui_config->search_show_unavailable = g_value_get_boolean (value);
       break;
@@ -641,9 +630,6 @@ gimp_gui_config_get_property (GObject    *object,
       break;
     case PROP_SEARCH_DIALOG_HEIGHT:
       g_value_set_int (value, gui_config->search_dialog_height);
-      break;
-    case PROP_SEARCH_DIALOG_OPACITY:
-      g_value_set_int (value, gui_config->search_dialog_opacity);
       break;
     case PROP_SEARCH_SHOW_UNAVAILABLE_ACTIONS:
       g_value_set_boolean (value, gui_config->search_show_unavailable);

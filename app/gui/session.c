@@ -65,7 +65,6 @@ enum
   SEARCH_DIALOG_POS_Y,
   SEARCH_DIALOG_WIDTH,
   SEARCH_DIALOG_HEIGHT,
-  SEARCH_DIALOG_OPACITY,
   LAST_TIP_SHOWN
 };
 
@@ -130,8 +129,6 @@ session_init (Gimp *gimp)
                               GINT_TO_POINTER (SEARCH_DIALOG_WIDTH));
   g_scanner_scope_add_symbol (scanner, 0,  "search-dialog-height",
                               GINT_TO_POINTER (SEARCH_DIALOG_HEIGHT));
-  g_scanner_scope_add_symbol (scanner, 0,  "search-dialog-opacity",
-                              GINT_TO_POINTER (SEARCH_DIALOG_OPACITY));
   g_scanner_scope_add_symbol (scanner, 0,  "last-tip-shown",
                               GINT_TO_POINTER (LAST_TIP_SHOWN));
 
@@ -335,19 +332,6 @@ session_init (Gimp *gimp)
                             "search-dialog-height", pos,
                             NULL);
             }
-          else if (scanner->value.v_symbol == GINT_TO_POINTER (SEARCH_DIALOG_OPACITY))
-            {
-              gint pos;
-
-              token = G_TOKEN_INT;
-
-              if (! gimp_scanner_parse_int (scanner, &pos))
-                break;
-
-              g_object_set (gimp->config,
-                            "search-dialog-opacity", pos,
-                            NULL);
-            }
           else if (scanner->value.v_symbol == GINT_TO_POINTER (LAST_TIP_SHOWN))
             {
               gint last_tip_shown;
@@ -493,11 +477,6 @@ session_save (Gimp     *gimp,
   gimp_config_writer_open (writer, "search-dialog-height");
   gimp_config_writer_printf (writer, "%d",
                              GIMP_GUI_CONFIG (gimp->config)->search_dialog_height);
-  gimp_config_writer_close (writer);
-
-  gimp_config_writer_open (writer, "search-dialog-opacity");
-  gimp_config_writer_printf (writer, "%d",
-                             GIMP_GUI_CONFIG (gimp->config)->search_dialog_opacity);
   gimp_config_writer_close (writer);
 
   gimp_config_writer_open (writer, "last-tip-shown");
